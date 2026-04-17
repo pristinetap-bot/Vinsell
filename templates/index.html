@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ClearVINReport - Vehicle History Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 60px 20px;
+        }
+
+        .logo {
+            width: 160px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #1a2b4c;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            background: #2ecc71;
+            color: white;
+            padding: 16px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 90%;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #27ae60;
+        }
+
+        .price {
+            font-size: 28px;
+            margin: 20px 0;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .social-proof {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #1a2b4c;
+            font-weight: bold;
+        }
+
+        .secure {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .contact {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .contact a {
+            color: #2ecc71;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contact a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <img class="logo" src="/static/logo.png" />
+
+    <h1>Get Vehicle History Report Instantly</h1>
+    <p>Purchase a report and enter your VIN on the secure report page.</p>
+
+    <form action="/buy" method="POST">
+        <button class="btn">Buy The Report Now</button>
+    </form>
+
+    <div class="price">$6 per report</div>
+
+    <div class="social-proof">
+        🔥 Trusted by {{ total_sold }}+ buyers
+    </div>
+
+    <div class="secure">
+        🔒 Secure checkout • Powered by Stripe
+    </div>
+
+    <!-- ✅ CONTACT ADDED HERE -->
+    <div class="contact">
+        Need help? Contact us on Instagram  
+        <br>
+        <a href="https://instagram.com/clearvinreport" target="_blank">
+            @clearvinreport
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>
