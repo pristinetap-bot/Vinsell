@@ -1,0 +1,4 @@
+links.db
+__pycache__/
+.DS_Store
+.env

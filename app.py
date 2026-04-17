@@ -3,8 +3,11 @@ import stripe
 import sqlite3
 import os
 
-# 🔑 Stripe key (replace with your real key)
-stripe.api_key = os.getenv("STRIPE_KEY") or "sk_test_XXXX"
+# ✅ Stripe key from environment ONLY
+stripe.api_key = os.getenv("STRIPE_KEY")
+
+if not stripe.api_key:
+    raise ValueError("STRIPE_KEY is not set")
 
 app = Flask(__name__)
 
@@ -20,24 +23,6 @@ def init_db():
     )
     """)
     conn.commit()
-    conn.close()
-
-def seed_links():
-    conn = sqlite3.connect("links.db")
-    c = conn.cursor()
-
-    c.execute("SELECT COUNT(*) FROM links")
-    if c.fetchone()[0] == 0:
-        links = [
-            ("https://vinchaxun.com/?CODE1",),
-            ("https://vinchaxun.com/?CODE2",),
-            ("https://vinchaxun.com/?CODE3",),
-            ("https://example.com/report1",),
-            ("https://example.com/report2",),
-        ]
-        c.executemany("INSERT INTO links (url) VALUES (?)", links)
-        conn.commit()
-
     conn.close()
 
 # 📊 Count sold
@@ -57,7 +42,6 @@ def home():
     total_sold = base + get_total_sold()
     return render_template("index.html", total_sold=total_sold)
 
-# ✅ Check availability before payment
 @app.route("/buy", methods=["POST"])
 def buy():
     conn = sqlite3.connect("links.db")
@@ -78,17 +62,16 @@ def buy():
                 "product_data": {
                     "name": "Vehicle History Report"
                 },
-                "unit_amount": 600,  # $6
+                "unit_amount": 600,
             },
             "quantity": 1,
         }],
-        success_url="http://127.0.0.1:5001/success",
-        cancel_url="http://127.0.0.1:5001/",
+        success_url="http://YOUR_PUBLIC_IP/success",
+        cancel_url="http://YOUR_PUBLIC_IP/",
     )
 
     return redirect(session.url)
 
-# ✅ Assign link AFTER payment → instant redirect
 @app.route("/success")
 def success():
     conn = sqlite3.connect("links.db")
@@ -96,7 +79,6 @@ def success():
     c = conn.cursor()
 
     c.execute("BEGIN EXCLUSIVE")
-
     c.execute("SELECT id, url FROM links WHERE status='unused' LIMIT 1")
     row = c.fetchone()
 
@@ -107,17 +89,14 @@ def success():
 
     link_id, link = row
 
-    # mark as used
     c.execute("UPDATE links SET status='used' WHERE id=?", (link_id,))
     conn.commit()
     conn.close()
 
-    # 🚀 DIRECT redirect (no page)
     return redirect(link)
 
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":
     init_db()
-    seed_links()
     app.run(host="0.0.0.0", port=5001, debug=True)
