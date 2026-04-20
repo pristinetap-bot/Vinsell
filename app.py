@@ -3,6 +3,7 @@ import os
 import sqlite3
 import stripe
 
+# ✅ Stripe key from environment
 stripe.api_key = os.getenv("STRIPE_KEY")
 if not stripe.api_key:
     raise ValueError("STRIPE_KEY is not set")
@@ -59,8 +60,8 @@ def buy():
 
     try:
         session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
             mode="payment",
+
             line_items=[{
                 "price_data": {
                     "currency": "usd",
@@ -71,9 +72,19 @@ def buy():
                 },
                 "quantity": 1,
             }],
+
+            # ✅ THIS IS THE KEY CHANGE (clean UI like Payment Links)
+            automatic_payment_methods={
+                "enabled": True
+            },
+
+            # ✅ Better checkout UX
+            billing_address_collection="auto",
+
             success_url="https://clearvinreport.org/success?session_id={CHECKOUT_SESSION_ID}",
             cancel_url="https://clearvinreport.org/",
         )
+
     except Exception as e:
         return f"<h2>Payment setup error: {str(e)}</h2>", 500
 
@@ -116,5 +127,6 @@ def success():
     return redirect(link)
 
 
+# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)
