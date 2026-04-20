@@ -1,18 +1,17 @@
 from flask import Flask, redirect, request, render_template
-import stripe
-import sqlite3
 import os
+import sqlite3
+import stripe
 
-# ✅ Stripe key from environment ONLY
 stripe.api_key = os.getenv("STRIPE_KEY")
-
 if not stripe.api_key:
     raise ValueError("STRIPE_KEY is not set")
 
 app = Flask(__name__)
 
+
 # ---------------- DB SETUP ----------------
-def init_db():
+def init_db() -> None:
     conn = sqlite3.connect("links.db")
     c = conn.cursor()
     c.execute("""
@@ -25,8 +24,12 @@ def init_db():
     conn.commit()
     conn.close()
 
-# 📊 Count sold
-def get_total_sold():
+
+init_db()
+
+
+# ---------------- HELPERS ----------------
+def get_total_sold() -> int:
     conn = sqlite3.connect("links.db")
     c = conn.cursor()
     c.execute("SELECT COUNT(*) FROM links WHERE status='used'")
@@ -34,13 +37,14 @@ def get_total_sold():
     conn.close()
     return count
 
-# ---------------- ROUTES ----------------
 
+# ---------------- ROUTES ----------------
 @app.route("/")
 def home():
     base = 385
     total_sold = base + get_total_sold()
     return render_template("index.html", total_sold=total_sold)
+
 
 @app.route("/buy", methods=["POST"])
 def buy():
@@ -53,27 +57,43 @@ def buy():
     if available == 0:
         return "<h2>❌ Sold Out. No reports available.</h2>"
 
-    session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        mode="payment",
-        line_items=[{
-            "price_data": {
-                "currency": "usd",
-                "product_data": {
-                    "name": "Vehicle History Report"
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="payment",
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": "Vehicle History Report"
+                    },
+                    "unit_amount": 600,
                 },
-                "unit_amount": 600,
-            },
-            "quantity": 1,
-        }],
-        success_url="http://YOUR_PUBLIC_IP/success",
-        cancel_url="http://YOUR_PUBLIC_IP/",
-    )
+                "quantity": 1,
+            }],
+            success_url="https://clearvinreport.org/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="https://clearvinreport.org/",
+        )
+    except Exception as e:
+        return f"<h2>Payment setup error: {str(e)}</h2>", 500
 
     return redirect(session.url)
 
+
 @app.route("/success")
 def success():
+    session_id = request.args.get("session_id")
+    if not session_id:
+        return "Invalid access", 403
+
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+    except Exception:
+        return "Invalid session", 403
+
+    if session.payment_status != "paid":
+        return "Payment not completed", 403
+
     conn = sqlite3.connect("links.db")
     conn.isolation_level = "EXCLUSIVE"
     c = conn.cursor()
@@ -95,8 +115,6 @@ def success():
 
     return redirect(link)
 
-# ---------------- RUN ----------------
 
 if __name__ == "__main__":
-    init_db()
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001)
