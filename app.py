@@ -3,7 +3,7 @@ import os
 import sqlite3
 import stripe
 
-# ✅ Stripe key
+# ---------------- STRIPE SETUP ----------------
 stripe.api_key = os.getenv("STRIPE_KEY")
 if not stripe.api_key:
     raise ValueError("STRIPE_KEY is not set")
@@ -62,6 +62,9 @@ def buy():
         session = stripe.checkout.Session.create(
             mode="payment",
 
+            # ✅ KEY FIX: Only card → Stripe auto adds Apple Pay, Google Pay, Link, Cash App
+            payment_method_types=["card"],
+
             line_items=[{
                 "price_data": {
                     "currency": "usd",
@@ -73,12 +76,12 @@ def buy():
                 "quantity": 1,
             }],
 
-            automatic_payment_methods={"enabled": True},
             billing_address_collection="auto",
 
-            # 🔥 IMPORTANT: prevent reuse abuse
+            # ✅ metadata for tracking + anti-abuse
             metadata={
-                "type": "vin_report"
+                "type": "vin_report",
+                "used": "false"
             },
 
             success_url="https://clearvinreport.org/success?session_id={CHECKOUT_SESSION_ID}",
@@ -99,14 +102,14 @@ def success():
 
     try:
         session = stripe.checkout.Session.retrieve(session_id)
-    except Exception:
-        return "Invalid session", 403
+    except Exception as e:
+        return f"Invalid session: {str(e)}", 403
 
     # ✅ Must be paid
     if session.payment_status != "paid":
         return "Payment not completed", 403
 
-    # 🔥 Prevent reuse (VERY IMPORTANT)
+    # 🔥 Prevent reuse
     if session.metadata.get("used") == "true":
         return "Already used", 403
 
@@ -129,13 +132,13 @@ def success():
     conn.commit()
     conn.close()
 
-    # 🔥 Mark Stripe session as used (prevents abuse)
+    # 🔥 Mark Stripe session as used
     try:
         stripe.checkout.Session.modify(
             session_id,
             metadata={"used": "true"}
         )
-    except:
+    except Exception:
         pass
 
     return redirect(link)
