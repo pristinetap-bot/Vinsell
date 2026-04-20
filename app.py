@@ -3,7 +3,7 @@ import os
 import sqlite3
 import stripe
 
-# ✅ Stripe key from environment
+# ✅ Stripe key
 stripe.api_key = os.getenv("STRIPE_KEY")
 if not stripe.api_key:
     raise ValueError("STRIPE_KEY is not set")
@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 
 # ---------------- DB SETUP ----------------
-def init_db() -> None:
+def init_db():
     conn = sqlite3.connect("links.db")
     c = conn.cursor()
     c.execute("""
@@ -30,7 +30,7 @@ init_db()
 
 
 # ---------------- HELPERS ----------------
-def get_total_sold() -> int:
+def get_total_sold():
     conn = sqlite3.connect("links.db")
     c = conn.cursor()
     c.execute("SELECT COUNT(*) FROM links WHERE status='used'")
@@ -73,13 +73,13 @@ def buy():
                 "quantity": 1,
             }],
 
-            # ✅ THIS IS THE KEY CHANGE (clean UI like Payment Links)
-            automatic_payment_methods={
-                "enabled": True
-            },
-
-            # ✅ Better checkout UX
+            automatic_payment_methods={"enabled": True},
             billing_address_collection="auto",
+
+            # 🔥 IMPORTANT: prevent reuse abuse
+            metadata={
+                "type": "vin_report"
+            },
 
             success_url="https://clearvinreport.org/success?session_id={CHECKOUT_SESSION_ID}",
             cancel_url="https://clearvinreport.org/",
@@ -102,8 +102,13 @@ def success():
     except Exception:
         return "Invalid session", 403
 
+    # ✅ Must be paid
     if session.payment_status != "paid":
         return "Payment not completed", 403
+
+    # 🔥 Prevent reuse (VERY IMPORTANT)
+    if session.metadata.get("used") == "true":
+        return "Already used", 403
 
     conn = sqlite3.connect("links.db")
     conn.isolation_level = "EXCLUSIVE"
@@ -123,6 +128,15 @@ def success():
     c.execute("UPDATE links SET status='used' WHERE id=?", (link_id,))
     conn.commit()
     conn.close()
+
+    # 🔥 Mark Stripe session as used (prevents abuse)
+    try:
+        stripe.checkout.Session.modify(
+            session_id,
+            metadata={"used": "true"}
+        )
+    except:
+        pass
 
     return redirect(link)
 
