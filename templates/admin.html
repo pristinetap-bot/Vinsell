@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Admin | ClearVINReport</title>
+    <style>
+        :root {
+            --navy: #13243a;
+            --slate: #627385;
+            --green: #1d9b62;
+            --green-dark: #17784c;
+            --gold: #a86f00;
+            --gold-bg: #fff4d6;
+            --line: rgba(19, 36, 58, 0.1);
+            --panel: rgba(255, 255, 255, 0.96);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Avenir Next", "Segoe UI", sans-serif;
+            color: var(--navy);
+            background: linear-gradient(180deg, #f7fbfd 0%, #edf3f8 100%);
+        }
+
+        .shell {
+            width: min(1100px, calc(100% - 24px));
+            margin: 0 auto;
+            padding: 24px 0 40px;
+        }
+
+        .topbar,
+        .panel {
+            border-radius: 24px;
+            background: var(--panel);
+            box-shadow: 0 24px 60px rgba(19, 36, 58, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+        }
+
+        .subtext {
+            margin-top: 6px;
+            color: var(--slate);
+        }
+
+        .logout-form button {
+            border: 0;
+            border-radius: 14px;
+            background: #13243a;
+            color: #fff;
+            padding: 12px 16px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 20px;
+        }
+
+        .panel {
+            padding: 24px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .stat {
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: #fbfdff;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+        }
+
+        .stat-label {
+            margin-top: 6px;
+            color: var(--slate);
+            font-size: 0.92rem;
+        }
+
+        .alert {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: var(--gold-bg);
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .success {
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(29, 155, 98, 0.1);
+            color: var(--green-dark);
+            font-weight: 700;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            margin-top: 16px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            resize: vertical;
+            font: inherit;
+        }
+
+        .hint {
+            margin-top: 10px;
+            color: var(--slate);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .primary-btn {
+            margin-top: 14px;
+            min-height: 54px;
+            padding: 14px 18px;
+            border: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .meta {
+            margin-top: 18px;
+            color: var(--slate);
+            line-height: 1.7;
+        }
+
+        .table-wrap {
+            margin-top: 18px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+            font-size: 0.94rem;
+        }
+
+        th {
+            background: #f8fbfd;
+            font-size: 0.84rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--slate);
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .status-unused {
+            background: rgba(29, 155, 98, 0.12);
+            color: var(--green-dark);
+        }
+
+        .status-used {
+            background: rgba(19, 36, 58, 0.08);
+            color: var(--navy);
+        }
+
+        .url-cell {
+            word-break: break-all;
+            color: var(--slate);
+        }
+
+        @media (max-width: 900px) {
+            .grid,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <div class="topbar">
+            <div>
+                <h1>Inventory Dashboard</h1>
+                <div class="subtext">Add links, see remaining stock, and keep the site from going sold out.</div>
+            </div>
+            <form class="logout-form" method="POST" action="/admin/logout">
+                <button type="submit">Log Out</button>
+            </form>
+        </div>
+
+        {% if message %}
+        <div class="success">{{ message }}</div>
+        {% endif %}
+
+        <div class="grid">
+            <section class="panel">
+                <h2>Stock overview</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-number">{{ available }}</span>
+                        <div class="stat-label">Available links</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">{{ used }}</span>
+                        <div class="stat-label">Used links</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">{{ total }}</span>
+                        <div class="stat-label">Total links</div>
+                    </div>
+                </div>
+
+                {% if available <= low_stock_threshold %}
+                <div class="alert">
+                    Low stock warning: only {{ available }} link(s) left.
+                </div>
+                {% endif %}
+
+                <div class="meta">
+                    Low stock threshold: <strong>{{ low_stock_threshold }}</strong><br>
+                    Add more links here any time inventory starts getting low.
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Add new links</h2>
+                <div class="subtext">Paste one link per line and submit to add them in bulk.</div>
+                <form method="POST" action="/admin/add-links">
+                    <textarea name="links" placeholder="https://example.com/report-a&#10;https://example.com/report-b"></textarea>
+                    <button class="primary-btn" type="submit">Add Links</button>
+                </form>
+                <div class="hint">
+                    Tip: this keeps new links marked as unused so the next paid order can use them immediately.
+                </div>
+            </section>
+        </div>
+
+        <section class="panel" style="margin-top: 20px;">
+            <h2>Recent links</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Link</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in recent_links %}
+                        <tr>
+                            <td>{{ row["id"] }}</td>
+                            <td class="url-cell">{{ row["url"] }}</td>
+                            <td>
+                                <span class="status-pill status-{{ row['status'] }}">
+                                    {{ row["status"] }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

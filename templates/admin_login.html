@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | ClearVINReport</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(180deg, #f6fbfd 0%, #eaf2f7 100%);
+            font-family: "Avenir Next", "Segoe UI", sans-serif;
+            color: #13243a;
+        }
+
+        .card {
+            width: min(100% - 24px, 420px);
+            padding: 28px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 24px 60px rgba(19, 36, 58, 0.12);
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 2rem;
+        }
+
+        p {
+            margin: 0 0 20px;
+            color: #617286;
+            line-height: 1.6;
+        }
+
+        input {
+            width: 100%;
+            min-height: 54px;
+            padding: 14px 16px;
+            border: 1px solid rgba(19, 36, 58, 0.12);
+            border-radius: 16px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 14px;
+            min-height: 54px;
+            border: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #1d9b62 0%, #17784c 100%);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .error {
+            margin-top: 14px;
+            color: #b42318;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <h1>Admin access</h1>
+        <p>Enter your password to manage report links and inventory.</p>
+        <form method="POST" action="/admin/login">
+            <input type="password" name="password" placeholder="Admin password" required>
+            <button type="submit">Open Dashboard</button>
+        </form>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+    </main>
+</body>
+</html>
