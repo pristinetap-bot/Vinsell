@@ -1,8 +1,9 @@
 from flask import Flask, redirect, request, render_template, abort
-import stripe
-import sqlite3
 import os
+import sqlite3
+import stripe
 
+# ---------------- STRIPE SETUP ----------------
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY") or os.getenv("STRIPE_KEY")
 
 app = Flask(__name__)
@@ -25,18 +26,21 @@ def require_stripe_key():
             ),
         )
 
+
 # ---------------- DB SETUP ----------------
 def init_db():
     conn = sqlite3.connect("links.db")
     c = conn.cursor()
-    c.execute("""
+    c.execute(
+        """
     CREATE TABLE IF NOT EXISTS links (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         url TEXT,
         status TEXT DEFAULT 'unused',
         stripe_session_id TEXT
     )
-    """)
+    """
+    )
     c.execute("PRAGMA table_info(links)")
     columns = [row[1] for row in c.fetchall()]
     if "stripe_session_id" not in columns:
@@ -44,25 +48,11 @@ def init_db():
     conn.commit()
     conn.close()
 
-def seed_links():
-    conn = sqlite3.connect("links.db")
-    c = conn.cursor()
 
-    c.execute("SELECT COUNT(*) FROM links")
-    if c.fetchone()[0] == 0:
-        links = [
-            ("https://vinchaxun.com/?CODE1",),
-            ("https://vinchaxun.com/?CODE2",),
-            ("https://vinchaxun.com/?CODE3",),
-            ("https://example.com/report1",),
-            ("https://example.com/report2",),
-        ]
-        c.executemany("INSERT INTO links (url) VALUES (?)", links)
-        conn.commit()
+init_db()
 
-    conn.close()
 
-# 📊 Count sold
+# ---------------- HELPERS ----------------
 def get_total_sold():
     conn = sqlite3.connect("links.db")
     c = conn.cursor()
@@ -71,15 +61,15 @@ def get_total_sold():
     conn.close()
     return count
 
-# ---------------- ROUTES ----------------
 
+# ---------------- ROUTES ----------------
 @app.route("/")
 def home():
     base = 385
     total_sold = base + get_total_sold()
     return render_template("index.html", total_sold=total_sold)
 
-# ✅ Check availability before payment
+
 @app.route("/buy", methods=["POST"])
 def buy():
     require_stripe_key()
@@ -93,48 +83,52 @@ def buy():
     if available == 0:
         return "<h2>❌ Sold Out. No reports available.</h2>"
 
-    session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        mode="payment",
-        line_items=[{
-            "price_data": {
-                "currency": "usd",
-                "product_data": {
-                    "name": "Vehicle History Report"
-                },
-                "unit_amount": 600,  # $6
-            },
-            "quantity": 1,
-        }],
-        success_url=f"{get_base_url()}/success?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{get_base_url()}/",
-    )
+    try:
+        session = stripe.checkout.Session.create(
+            mode="payment",
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {"name": "Vehicle History Report"},
+                        "unit_amount": 600,
+                    },
+                    "quantity": 1,
+                }
+            ],
+            billing_address_collection="auto",
+            metadata={"type": "vin_report"},
+            success_url=f"{get_base_url()}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{get_base_url()}/",
+        )
+    except Exception as e:
+        return f"<h2>Payment setup error: {str(e)}</h2>", 500
 
     return redirect(session.url)
 
-# ✅ Assign link AFTER payment → instant redirect
+
 @app.route("/success")
 def success():
     require_stripe_key()
 
     session_id = request.args.get("session_id")
     if not session_id:
-        return "<h2>Payment session not found.</h2>", 400
+        return "Invalid access", 403
 
     try:
         session = stripe.checkout.Session.retrieve(session_id)
-    except stripe.error.StripeError:
-        return "<h2>Unable to verify payment with Stripe.</h2>", 400
+    except Exception as e:
+        return f"Invalid session: {str(e)}", 403
 
     if session.get("payment_status") != "paid":
-        return "<h2>Payment was not completed.</h2>", 400
+        return "Payment not completed", 403
 
     conn = sqlite3.connect("links.db")
     conn.isolation_level = "EXCLUSIVE"
     c = conn.cursor()
 
     c.execute("BEGIN EXCLUSIVE")
-
     c.execute(
         "SELECT url FROM links WHERE stripe_session_id=? AND status='used' LIMIT 1",
         (session_id,),
@@ -155,7 +149,6 @@ def success():
 
     link_id, link = row
 
-    # mark as used
     c.execute(
         "UPDATE links SET status='used', stripe_session_id=? WHERE id=?",
         (session_id, link_id),
@@ -163,12 +156,9 @@ def success():
     conn.commit()
     conn.close()
 
-    # 🚀 DIRECT redirect (no page)
     return redirect(link)
 
-# ---------------- RUN ----------------
 
+# ---------------- RUN ----------------
 if __name__ == "__main__":
-    init_db()
-    seed_links()
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001)
