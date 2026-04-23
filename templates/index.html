@@ -109,9 +109,10 @@
 
         h1 {
             margin: 0;
-            font-size: clamp(2.1rem, 6vw, 3rem);
-            line-height: 0.98;
-            letter-spacing: -0.04em;
+            font-size: clamp(1.05rem, 3.4vw, 1.3rem);
+            line-height: 1.45;
+            letter-spacing: -0.01em;
+            font-weight: 500;
         }
 
         .subtext {
@@ -299,7 +300,12 @@
             <div class="proof-top">Trusted by {{ total_sold }}+ buyers</div>
 
             <div class="eyebrow">Secure Stripe checkout • Apple Pay supported</div>
-            <h1>Enter your VIN, verify your vehicle, pay with Stripe, and get your report.</h1>
+            <h1>
+                Enter your VIN.<br>
+                Verify your vehicle.<br>
+                Pay with Stripe.<br>
+                Get your report.
+            </h1>
 
             <form class="buy-form" action="/buy" method="POST" id="buy-form">
                 <section class="vin-panel">
