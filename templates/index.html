@@ -47,11 +47,11 @@
         }
 
         .logo {
-            width: 144px;
-            height: 144px;
-            margin: 0 auto 22px;
-            padding: 12px;
-            border-radius: 32px;
+            width: 168px;
+            height: 168px;
+            margin: 0 auto 18px;
+            padding: 16px;
+            border-radius: 36px;
             background: linear-gradient(180deg, #ffffff, #edf3f7);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
@@ -59,8 +59,28 @@
         .logo img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            border-radius: 24px;
+            object-fit: contain;
+            object-position: center;
+            border-radius: 26px;
+        }
+
+        .brand-name {
+            margin: 0;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+
+        .brand-name .accent {
+            color: var(--green);
+        }
+
+        .brand-subtitle {
+            margin: 8px 0 16px;
+            color: var(--slate);
+            font-size: 0.98rem;
+            line-height: 1.4;
         }
 
         .eyebrow {
@@ -182,14 +202,14 @@
             }
 
             .logo {
-                width: 120px;
-                height: 120px;
-                padding: 10px;
-                border-radius: 28px;
+                width: 138px;
+                height: 138px;
+                padding: 14px;
+                border-radius: 30px;
             }
 
             .logo img {
-                border-radius: 20px;
+                border-radius: 22px;
             }
 
             .price {
@@ -204,6 +224,8 @@
             <div class="logo">
                 <img src="/static/logo.png" alt="ClearVINReport logo">
             </div>
+            <h2 class="brand-name">Clear<span class="accent">VIN</span>Report</h2>
+            <div class="brand-subtitle">Instant vehicle history reports</div>
 
             <div class="eyebrow">Secure vehicle history lookup</div>
             <h1>Get your report fast.</h1>
