@@ -9,9 +9,12 @@
             --navy: #102033;
             --slate: #5f6f82;
             --line: rgba(16, 32, 51, 0.1);
-            --surface: rgba(255, 255, 255, 0.94);
+            --surface: rgba(255, 255, 255, 0.95);
             --green: #1d9b62;
             --green-dark: #17784c;
+            --green-soft: rgba(29, 155, 98, 0.1);
+            --red: #b42318;
+            --red-soft: rgba(180, 35, 24, 0.08);
             --bg: #eef4f8;
             --shadow: 0 24px 60px rgba(16, 32, 51, 0.14);
         }
@@ -33,25 +36,25 @@
             min-height: 100vh;
             display: grid;
             place-items: center;
-            padding: 24px;
+            padding: 14px;
         }
 
         .card {
-            width: min(100%, 520px);
-            padding: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-radius: 28px;
+            width: min(100%, 560px);
+            padding: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.82);
+            border-radius: 30px;
             background: var(--surface);
             box-shadow: var(--shadow);
             text-align: center;
         }
 
         .logo {
-            width: 168px;
-            height: 168px;
-            margin: 0 auto 18px;
-            padding: 16px;
-            border-radius: 36px;
+            width: 112px;
+            height: 112px;
+            margin: 0 auto 14px;
+            padding: 10px;
+            border-radius: 28px;
             background: linear-gradient(180deg, #ffffff, #edf3f7);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
@@ -61,15 +64,15 @@
             height: 100%;
             object-fit: contain;
             object-position: center;
-            border-radius: 26px;
+            border-radius: 22px;
         }
 
         .brand-name {
-            margin: 0;
-            font-size: clamp(1.6rem, 4vw, 2.4rem);
-            font-weight: 800;
-            letter-spacing: -0.04em;
+            margin: 0 0 6px;
+            font-size: clamp(1.55rem, 4vw, 2.1rem);
             line-height: 1;
+            letter-spacing: -0.04em;
+            font-weight: 800;
         }
 
         .brand-name .accent {
@@ -77,20 +80,27 @@
         }
 
         .brand-subtitle {
-            margin: 8px 0 16px;
+            margin: 0 0 8px;
             color: var(--slate);
-            font-size: 0.98rem;
-            line-height: 1.4;
+            font-size: 0.92rem;
+            line-height: 1.35;
+        }
+
+        .proof-top {
+            margin: 0 0 12px;
+            color: var(--green-dark);
+            font-size: 0.92rem;
+            font-weight: 800;
         }
 
         .eyebrow {
             display: inline-block;
             margin-bottom: 10px;
-            padding: 7px 12px;
+            padding: 6px 11px;
             border-radius: 999px;
-            background: rgba(29, 155, 98, 0.1);
+            background: var(--green-soft);
             color: var(--green-dark);
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -98,38 +108,102 @@
 
         h1 {
             margin: 0;
-            font-size: clamp(2rem, 6vw, 3.1rem);
-            line-height: 0.98;
+            font-size: clamp(1.95rem, 6vw, 2.9rem);
+            line-height: 0.96;
             letter-spacing: -0.04em;
         }
 
         .subtext {
-            margin: 14px auto 22px;
-            max-width: 30ch;
+            margin: 10px auto 16px;
+            max-width: 34ch;
             color: var(--slate);
-            font-size: 1rem;
-            line-height: 1.65;
+            font-size: 0.95rem;
+            line-height: 1.52;
         }
 
+        .vin-panel,
         .offer {
-            margin: 0 0 22px;
-            padding: 22px 20px;
+            margin: 0 0 16px;
+            padding: 18px;
             border: 1px solid var(--line);
             border-radius: 22px;
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 251, 0.92));
         }
 
+        .panel-title {
+            margin: 0 0 8px;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .panel-copy {
+            margin: 0 0 14px;
+            color: var(--slate);
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .vin-field {
+            width: 100%;
+            min-height: 54px;
+            padding: 14px 16px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            font: inherit;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .vin-status {
+            margin-top: 12px;
+            min-height: 46px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            display: none;
+        }
+
+        .vin-status.show {
+            display: block;
+        }
+
+        .vin-status.loading {
+            background: rgba(16, 32, 51, 0.05);
+            color: var(--navy);
+        }
+
+        .vin-status.success {
+            background: var(--green-soft);
+            color: var(--green-dark);
+            font-weight: 800;
+        }
+
+        .vin-status.error {
+            background: var(--red-soft);
+            color: var(--red);
+            font-weight: 700;
+        }
+
         .price {
-            font-size: 3.4rem;
+            font-size: 3rem;
             line-height: 1;
             letter-spacing: -0.06em;
             font-weight: 800;
         }
 
         .price-note {
-            margin-top: 8px;
+            margin-top: 6px;
             color: var(--slate);
-            font-size: 0.98rem;
+            font-size: 0.92rem;
+        }
+
+        .flow-note {
+            margin-top: 10px;
+            color: var(--slate);
+            font-size: 0.9rem;
+            line-height: 1.45;
         }
 
         .buy-form {
@@ -138,16 +212,22 @@
 
         .btn {
             width: 100%;
-            min-height: 58px;
-            padding: 16px 20px;
+            min-height: 56px;
+            padding: 14px 20px;
             border: 0;
             border-radius: 18px;
             cursor: pointer;
             background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
             color: #fff;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 800;
             box-shadow: 0 20px 40px rgba(23, 120, 76, 0.24);
+        }
+
+        .btn[disabled] {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         .trust {
@@ -155,30 +235,24 @@
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
-            margin-top: 16px;
+            margin-top: 14px;
         }
 
         .chip {
-            padding: 9px 12px;
+            padding: 8px 11px;
             border: 1px solid var(--line);
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.84);
             color: var(--navy);
-            font-size: 0.84rem;
+            font-size: 0.8rem;
             font-weight: 700;
         }
 
-        .proof {
-            margin-top: 18px;
-            color: var(--slate);
-            font-size: 0.95rem;
-        }
-
         .help {
-            margin-top: 18px;
+            margin-top: 12px;
             color: var(--slate);
-            font-size: 0.92rem;
-            line-height: 1.6;
+            font-size: 0.88rem;
+            line-height: 1.45;
         }
 
         .help a {
@@ -192,28 +266,24 @@
         }
 
         @media (max-width: 540px) {
-            .wrap {
-                padding: 14px;
-            }
-
             .card {
-                padding: 22px 18px;
+                padding: 18px 16px;
                 border-radius: 24px;
             }
 
             .logo {
-                width: 138px;
-                height: 138px;
-                padding: 14px;
-                border-radius: 30px;
+                width: 96px;
+                height: 96px;
+                padding: 9px;
+                border-radius: 24px;
             }
 
             .logo img {
-                border-radius: 22px;
+                border-radius: 18px;
             }
 
             .price {
-                font-size: 3rem;
+                font-size: 2.6rem;
             }
         }
     </style>
@@ -225,33 +295,142 @@
                 <img src="/static/logo.png" alt="ClearVINReport logo">
             </div>
             <h2 class="brand-name">Clear<span class="accent">VIN</span>Report</h2>
-            <div class="brand-subtitle">Instant vehicle history reports</div>
+            <div class="brand-subtitle">Fast online vehicle history access</div>
+            <div class="proof-top">Trusted by {{ total_sold }}+ buyers</div>
 
-            <div class="eyebrow">Secure vehicle history lookup</div>
-            <h1>Get your report fast.</h1>
-            <p class="subtext">Simple checkout, mobile-friendly payment, and direct access after successful payment.</p>
+            <div class="eyebrow">Secure Stripe checkout</div>
+            <h1>Enter your VIN, verify your vehicle, and get your report.</h1>
+            <p class="subtext">We verify the VIN first. Then you pay securely with Stripe and continue to the report website for the final report lookup.</p>
 
-            <section class="offer">
-                <div class="price">$6</div>
-                <div class="price-note">One-time payment</div>
-            </section>
+            <form class="buy-form" action="/buy" method="POST" id="buy-form">
+                <section class="vin-panel">
+                    <div class="panel-title">Step 1: Check your VIN</div>
+                    <div class="panel-copy">Enter the 17-character VIN and we will detect the vehicle before checkout.</div>
+                    <input
+                        class="vin-field"
+                        id="vin-input"
+                        name="vin"
+                        type="text"
+                        inputmode="text"
+                        autocomplete="off"
+                        placeholder="Enter 17-character VIN"
+                        maxlength="17"
+                        required
+                    >
+                    <div class="vin-status" id="vin-status"></div>
+                </section>
 
-            <form class="buy-form" action="/buy" method="POST">
-                <button class="btn" type="submit">Buy Report Now</button>
+                <section class="offer">
+                    <div class="price">$6</div>
+                    <div class="price-note">One-time payment</div>
+                    <div class="flow-note">Apple Pay or card checkout available through Stripe</div>
+                </section>
+
+                <button class="btn" id="buy-button" type="submit" disabled>Verify VIN to Continue</button>
             </form>
 
             <div class="trust">
-                <div class="chip">Secure checkout</div>
-                <div class="chip">Stripe powered</div>
+                <div class="chip">Vehicle verified first</div>
+                <div class="chip">Stripe powered checkout</div>
                 <div class="chip">Apple Pay supported</div>
             </div>
-
-            <div class="proof">Trusted by {{ total_sold }}+ buyers</div>
 
             <div class="help">
                 Need help? <a href="https://instagram.com/clearvinreport" target="_blank" rel="noopener noreferrer">@clearvinreport</a>
             </div>
         </main>
     </div>
+
+    <script>
+        const vinInput = document.getElementById("vin-input");
+        const vinStatus = document.getElementById("vin-status");
+        const buyButton = document.getElementById("buy-button");
+        const buyForm = document.getElementById("buy-form");
+        let verifiedVin = "";
+        let decodeTimer = null;
+
+        function setStatus(type, message) {
+            vinStatus.className = "vin-status show " + type;
+            vinStatus.textContent = message;
+        }
+
+        function resetVerification(message) {
+            verifiedVin = "";
+            buyButton.disabled = true;
+            buyButton.textContent = "Verify VIN to Continue";
+            if (message) {
+                setStatus("error", message);
+            } else {
+                vinStatus.className = "vin-status";
+                vinStatus.textContent = "";
+            }
+        }
+
+        async function decodeVin() {
+            const vin = vinInput.value.toUpperCase().replace(/\s+/g, "");
+            vinInput.value = vin;
+
+            if (vin.length === 0) {
+                resetVerification("");
+                return;
+            }
+
+            if (vin.length < 17) {
+                resetVerification("VIN must be 17 characters.");
+                return;
+            }
+
+            setStatus("loading", "Verifying VIN...");
+
+            try {
+                const response = await fetch("/api/decode-vin", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ vin }),
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.ok) {
+                    resetVerification(data.message || "VIN could not be verified.");
+                    return;
+                }
+
+                verifiedVin = data.vin;
+                buyButton.disabled = false;
+                buyButton.textContent = "Checkout and Get Report";
+                setStatus("success", "Vehicle detected: " + data.vehicle_label);
+            } catch (error) {
+                resetVerification("Unable to verify VIN right now. Please try again.");
+            }
+        }
+
+        vinInput.addEventListener("input", () => {
+            const vin = vinInput.value.toUpperCase().replace(/\s+/g, "");
+            vinInput.value = vin;
+            verifiedVin = "";
+            buyButton.disabled = true;
+            buyButton.textContent = "Verify VIN to Continue";
+
+            if (decodeTimer) {
+                clearTimeout(decodeTimer);
+            }
+
+            if (vin.length === 17) {
+                decodeTimer = setTimeout(decodeVin, 250);
+            } else if (vin.length > 0) {
+                resetVerification("VIN must be 17 characters.");
+            } else {
+                resetVerification("");
+            }
+        });
+
+        buyForm.addEventListener("submit", (event) => {
+            const currentVin = vinInput.value.toUpperCase().replace(/\s+/g, "");
+            if (!verifiedVin || currentVin !== verifiedVin) {
+                event.preventDefault();
+                resetVerification("Please verify the VIN before checkout.");
+            }
+        });
+    </script>
 </body>
 </html>

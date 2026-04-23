@@ -1,7 +1,19 @@
-from flask import Flask, abort, redirect, render_template, request, session, url_for
+from flask import (
+    Flask,
+    abort,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+import json
 import os
 import sqlite3
 import stripe
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.request import urlopen
 
 # ---------------- APP SETUP ----------------
 app = Flask(__name__)
@@ -54,6 +66,83 @@ def require_admin():
     if not is_admin_logged_in():
         return redirect(url_for("admin_login"))
     return None
+
+
+def normalize_vin(vin):
+    return "".join((vin or "").upper().split())
+
+
+def decode_vin(vin):
+    normalized_vin = normalize_vin(vin)
+
+    if len(normalized_vin) != 17:
+        return {"ok": False, "message": "VIN must be 17 characters."}
+
+    if any(char in normalized_vin for char in ("I", "O", "Q")):
+        return {"ok": False, "message": 'VIN cannot contain the letters "I", "O", or "Q".'}
+
+    api_url = (
+        "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/"
+        f"{normalized_vin}?format=json"
+    )
+
+    try:
+        with urlopen(api_url, timeout=10) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return {"ok": False, "message": "Unable to verify VIN right now. Please try again."}
+
+    results = payload.get("Results") or []
+    if not results:
+        return {"ok": False, "message": "VIN could not be decoded."}
+
+    record = results[0]
+    make = (record.get("Make") or "").strip()
+    model = (record.get("Model") or "").strip()
+    year = (record.get("ModelYear") or "").strip()
+    error_code = (record.get("ErrorCode") or "").strip()
+    error_text = (record.get("ErrorText") or "").strip()
+
+    if error_code and error_code != "0":
+        return {
+            "ok": False,
+            "message": error_text or "VIN could not be decoded.",
+        }
+
+    if not any([make, model, year]):
+        return {"ok": False, "message": "VIN could not be verified."}
+
+    vehicle_parts = [part for part in [year, make, model] if part]
+    vehicle_label = " ".join(vehicle_parts)
+
+    return {
+        "ok": True,
+        "vin": normalized_vin,
+        "year": year,
+        "make": make,
+        "model": model,
+        "vehicle_label": vehicle_label,
+    }
+
+
+def build_forward_url(base_url, vin):
+    query_param = os.getenv("FORWARD_VIN_QUERY_PARAM", "").strip()
+    if not query_param or not vin:
+        return base_url
+
+    split_url = urlsplit(base_url)
+    query = dict(parse_qsl(split_url.query, keep_blank_values=True))
+    query[query_param] = vin
+
+    return urlunsplit(
+        (
+            split_url.scheme,
+            split_url.netloc,
+            split_url.path,
+            urlencode(query),
+            split_url.fragment,
+        )
+    )
 
 
 # ---------------- DB SETUP ----------------
@@ -144,6 +233,14 @@ def home():
     return render_template("index.html", total_sold=total_sold)
 
 
+@app.route("/api/decode-vin", methods=["POST"])
+def api_decode_vin():
+    payload = request.get_json(silent=True) or {}
+    result = decode_vin(payload.get("vin", ""))
+    status_code = 200 if result["ok"] else 400
+    return jsonify(result), status_code
+
+
 @app.route("/buy", methods=["POST"])
 def buy():
     require_stripe_key()
@@ -151,6 +248,16 @@ def buy():
     available = get_available_links_count()
     if available == 0:
         return "<h2>❌ Sold Out. No reports available.</h2>"
+
+    vin_result = decode_vin(request.form.get("vin", ""))
+    if not vin_result["ok"]:
+        return f"<h2>{vin_result['message']}</h2>", 400
+
+    metadata = {
+        "type": "vin_report",
+        "vin": vin_result["vin"],
+        "vehicle": vin_result["vehicle_label"],
+    }
 
     try:
         session_data = stripe.checkout.Session.create(
@@ -167,7 +274,7 @@ def buy():
                 }
             ],
             billing_address_collection="auto",
-            metadata={"type": "vin_report"},
+            metadata=metadata,
             success_url=f"{get_base_url()}/success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{get_base_url()}/",
         )
@@ -193,6 +300,9 @@ def success():
     if stripe_session["payment_status"] != "paid":
         return "Payment not completed", 403
 
+    session_metadata = stripe_session["metadata"] if "metadata" in stripe_session else {}
+    vin = session_metadata.get("vin", "") if session_metadata else ""
+
     conn = get_db_connection()
     conn.isolation_level = "EXCLUSIVE"
     c = conn.cursor()
@@ -206,7 +316,7 @@ def success():
     if existing:
         conn.commit()
         conn.close()
-        return redirect(existing["url"])
+        return redirect(build_forward_url(existing["url"], vin))
 
     c.execute("SELECT id, url FROM links WHERE status='unused' ORDER BY id LIMIT 1")
     row = c.fetchone()
@@ -223,7 +333,7 @@ def success():
     conn.commit()
     conn.close()
 
-    return redirect(row["url"])
+    return redirect(build_forward_url(row["url"], vin))
 
 
 @app.route("/admin/login", methods=["GET", "POST"])
