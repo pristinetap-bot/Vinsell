@@ -300,8 +300,8 @@ def success():
     if stripe_session["payment_status"] != "paid":
         return "Payment not completed", 403
 
-    session_metadata = stripe_session["metadata"] if "metadata" in stripe_session else {}
-    vin = session_metadata.get("vin", "") if session_metadata else ""
+    session_metadata = stripe_session["metadata"] if "metadata" in stripe_session else None
+    vin = session_metadata["vin"] if session_metadata and "vin" in session_metadata else ""
 
     conn = get_db_connection()
     conn.isolation_level = "EXCLUSIVE"
