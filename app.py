@@ -190,7 +190,7 @@ def success():
     except Exception as e:
         return f"Invalid session: {str(e)}", 403
 
-    if stripe_session.get("payment_status") != "paid":
+    if stripe_session["payment_status"] != "paid":
         return "Payment not completed", 403
 
     conn = get_db_connection()
