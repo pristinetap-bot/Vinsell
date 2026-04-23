@@ -87,20 +87,21 @@
         }
 
         .proof-top {
-            margin: 0 0 12px;
+            margin: 0 0 14px;
             color: var(--green-dark);
-            font-size: 0.92rem;
+            font-size: 1.15rem;
             font-weight: 800;
+            line-height: 1.2;
         }
 
         .eyebrow {
             display: inline-block;
-            margin-bottom: 10px;
-            padding: 6px 11px;
+            margin-bottom: 12px;
+            padding: 8px 14px;
             border-radius: 999px;
             background: var(--green-soft);
             color: var(--green-dark);
-            font-size: 0.72rem;
+            font-size: 0.88rem;
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -108,17 +109,17 @@
 
         h1 {
             margin: 0;
-            font-size: clamp(1.95rem, 6vw, 2.9rem);
-            line-height: 0.96;
+            font-size: clamp(2.1rem, 6vw, 3rem);
+            line-height: 0.98;
             letter-spacing: -0.04em;
         }
 
         .subtext {
-            margin: 10px auto 16px;
-            max-width: 34ch;
+            margin: 10px auto 12px;
+            max-width: 28ch;
             color: var(--slate);
-            font-size: 0.95rem;
-            line-height: 1.52;
+            font-size: 0.92rem;
+            line-height: 1.42;
         }
 
         .vin-panel,
@@ -235,7 +236,7 @@
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
-            margin-top: 14px;
+            margin-top: 12px;
         }
 
         .chip {
@@ -295,12 +296,10 @@
                 <img src="/static/logo.png" alt="ClearVINReport logo">
             </div>
             <h2 class="brand-name">Clear<span class="accent">VIN</span>Report</h2>
-            <div class="brand-subtitle">Fast online vehicle history access</div>
             <div class="proof-top">Trusted by {{ total_sold }}+ buyers</div>
 
-            <div class="eyebrow">Secure Stripe checkout</div>
-            <h1>Enter your VIN, verify your vehicle, and get your report.</h1>
-            <p class="subtext">We verify the VIN first. Then you pay securely with Stripe and continue to the report website for the final report lookup.</p>
+            <div class="eyebrow">Secure Stripe checkout • Apple Pay supported</div>
+            <h1>Enter your VIN, verify your vehicle, pay with Stripe, and get your report.</h1>
 
             <form class="buy-form" action="/buy" method="POST" id="buy-form">
                 <section class="vin-panel">
