@@ -268,7 +268,7 @@ def buy():
                     "price_data": {
                         "currency": "usd",
                         "product_data": {"name": "Vehicle History Report"},
-                        "unit_amount": 600,
+                        "unit_amount": 500,
                     },
                     "quantity": 1,
                 }
